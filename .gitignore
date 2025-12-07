@@ -1,0 +1,115 @@
+# ---------------------------------------------------------
+# Global
+# ---------------------------------------------------------
+*.log
+*.tmp
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# ---------------------------------------------------------
+# Environment and Secrets
+# ---------------------------------------------------------
+.env
+.env.*
+!env.example
+
+# Private keys, certificates, CA files
+**/certs/**
+**/*.pem
+**/*.key
+**/*.crt
+**/*.csr
+**/*.p12
+
+# Prevent accidentally committing real firmware
+ota/firmware/*
+!ota/firmware/.gitkeep
+
+# ---------------------------------------------------------
+# Node-RED
+# ---------------------------------------------------------
+node-red/node_modules/
+node-red/.config.runtime.json
+node-red/.config.*
+node-red/.sessions.json
+node-red/flows_*.json.backup
+node-red/flows_cred.json
+
+# If you want to track flows.json, keep it.
+# Ignore runtime files:
+node-red/.node-red/
+node-red/data/
+
+# ---------------------------------------------------------
+# Docker
+# ---------------------------------------------------------
+# Docker volumes (local persistent data)
+docker-data/
+docker-volumes/
+
+# Compose override files
+docker-compose.override.yaml
+
+# ---------------------------------------------------------
+# Grafana
+# ---------------------------------------------------------
+grafana/data/
+grafana/plugins/
+grafana/provisioning/dashboards/*.json.backup
+
+# ---------------------------------------------------------
+# InfluxDB
+# ---------------------------------------------------------
+influxdb/data/
+influxdb/meta/
+influxdb/wal/
+influxdb/.influx_history
+
+# ---------------------------------------------------------
+# Loki / Promtail
+# ---------------------------------------------------------
+loki/data/
+loki/chunks/
+loki/wal/
+loki/*.boltdb*
+
+# ---------------------------------------------------------
+# MQTT (Mosquitto)
+# ---------------------------------------------------------
+mqtt/data/
+mqtt/log/
+mqtt/passwd
+mqtt/*.db
+
+# ---------------------------------------------------------
+# Device Portal / Web App
+# ---------------------------------------------------------
+# (Assuming frontend uses npm/pnpm/yarn)
+device-portal/node_modules/
+device-portal/dist/
+device-portal/build/
+device-portal/.cache/
+
+# ---------------------------------------------------------
+# Python OTA server
+# ---------------------------------------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ---------------------------------------------------------
+# Editor / Tooling
+# ---------------------------------------------------------
+.vscode/
+.idea/
+*.iml
+
+# ---------------------------------------------------------
+# System
+# ---------------------------------------------------------
+*.pid
+*.seed
+*.bak
