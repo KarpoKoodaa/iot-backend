@@ -1,0 +1,77 @@
+
+services:
+  mqtt:
+    image: eclipse-mosquitto:2
+    container_name: mqtt
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mqtt/data:/mosquitto/data
+      - ./mqtt/log:/mosquitto/log
+    networks:
+      - iot-net
+    restart: unless-stopped
+
+  influxdb:
+    image: influxdb:2
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME_FILE: /run/secrets/influxdb2-admin-username
+      DOCKER_INFLUXDB_INIT_PASSWORD_FILE: /run/secrets/influxdb2-admin-password
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN_FILE: /run/secrets/influxdb2-admin-token
+      DOCKER_INFLUXDB_INIT_ORG: iot
+      DOCKER_INFLUXDB_INIT_BUCKET: telemetry
+    secrets:
+      - influxdb2-admin-username
+      - influxdb2-admin-password
+      - influxdb2-admin-token
+    volumes:
+      - ./influxdb/data:/var/lib/influxdb2
+      - ./influxdb/config.toml:/etc/influxdb/config.toml
+    networks:
+      - iot-net
+    restart: unless-stopped
+     
+  node-red:
+    image: nodered/node-red:latest
+    container_name: node-red
+    environment:
+      - TZ=Europe/Helsinki
+    ports:
+      - "1880:1880"
+    volumes:
+      - ./node-red:/data
+    networks:
+      - iot-net
+    depends_on:
+      - mqtt
+      - influxdb
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./grafana/data:/var/lib/grafana
+    networks:
+      - iot-net
+    depends_on:
+      - influxdb
+    restart: unless-stopped
+
+
+networks:
+  iot-net:
+secrets:
+  influxdb2-admin-username:
+    file: ./influxdb/.env.influxdb2-admin-username
+  influxdb2-admin-password:
+    file: ./influxdb/.env.influxdb2-admin-password
+  influxdb2-admin-token:
+    file: ./influxdb/.env.influxdb2-admin-token
