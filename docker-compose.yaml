@@ -6,9 +6,9 @@ services:
     ports:
       - "1883:1883"
     volumes:
-      - ./mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf
-      - ./mqtt/data:/mosquitto/data
-      - ./mqtt/log:/mosquitto/log
+      - /mnt/iot-data/mqtt/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - /mnt/iot-data/mqtt/data:/mosquitto/data
+      - /mnt/iot-data/mqtt/log:/mosquitto/log
     networks:
       - iot-net
     restart: unless-stopped
@@ -30,8 +30,8 @@ services:
       - influxdb2-admin-password
       - influxdb2-admin-token
     volumes:
-      - ./influxdb/data:/var/lib/influxdb2
-      - ./influxdb/config.toml:/etc/influxdb/config.toml
+      - /mnt/iot-data/influxdb/data:/var/lib/influxdb2
+      - /mnt/iot-data/influxdb/config.toml:/etc/influxdb/config.toml
     networks:
       - iot-net
     restart: unless-stopped
@@ -44,7 +44,7 @@ services:
     ports:
       - "1880:1880"
     volumes:
-      - ./node-red:/data
+      - /mnt/iot-data/node-red:/data
     networks:
       - iot-net
     depends_on:
@@ -58,7 +58,7 @@ services:
     ports:
       - "3000:3000"
     volumes:
-      - ./grafana/data:/var/lib/grafana
+      - /mnt/iot-data/grafana/data:/var/lib/grafana
     networks:
       - iot-net
     depends_on:
@@ -70,8 +70,8 @@ networks:
   iot-net:
 secrets:
   influxdb2-admin-username:
-    file: ./influxdb/.env.influxdb2-admin-username
+    file: /mnt/iot-data/secrets/influxdb/influxdb2-admin-username
   influxdb2-admin-password:
-    file: ./influxdb/.env.influxdb2-admin-password
+    file: /mnt/iot-data/secrets/influxdb/influxdb2-admin-password
   influxdb2-admin-token:
-    file: ./influxdb/.env.influxdb2-admin-token
+    file: /mnt/iot-data/secrets/influxdb/influxdb2-admin-token
