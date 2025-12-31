@@ -31,7 +31,43 @@ The goal is to define a clear and stable contract that allows devices, backend s
 - **RTC**: Real-Time Clock - hardware clock for accurate timekeeping
 - **TLS**: Transport Layer Security - encryption protocol for MQTT
 
-## 2. Telemetry Data model
+## 2. Architecture Overview
+TBA
+
+## 3. Design Rationale
+
+### Why Topic-per-Measurement?
+
+**Advantages:**
+- Subscribers receive only needed data (e.q. dashboard subscribes to temperature only).
+- Easy to add new sensor types without schema changes.
+- Simplifies time-series database ingestion (one topic = one metric).
+- Granular QoS and retention policies per measurement type.
+- Better for MQTT wildcards and routing rules.
+
+**Trade-offs:**
+- Increased message volume (4 messages vs 1 batched).
+- Loss of atomic snapshots (measurements not guaranteed simultaneous).
+- Slightly higer network overhead.
+
+**Why Acceptable:**
+- WiFi gateway has sufficient bandwidth.
+- Measurement atomicity not critical for environmental monitoring.
+- Benefits outweigh costs for this use case.
+
+### Why HMAC Instead of JWT?
+
+**Reasons:**
+- 10x lighter on ESP32 resources.
+- Faster verification. 
+- Simpler implementation, fewer dependencies.
+- Sufficient security for trusted network deployment.
+
+** When to upgrade to JWT:**
+- If commands need to carry user identity/roles.
+- If gateway needs to verify command from multiple backends.
+
+## 4. Telemetry Data model
 Each sensor publishes its measurements to a dedicated MQTT topic. This simplifies device firmware and topic-based routing at the cost of increased message volume and reduced measurement atomicity.
 
 **Fields**
@@ -51,11 +87,11 @@ Each sensor publishes its measurements to a dedicated MQTT topic. This simplifie
 ```
 
 
-## 3. Communication protocol
+## 5. Communication protocol
 - **Protocol**: MQTT
 - **Payload format:** JSON
 
-## 4. MQTT Topic Structure
+## 6. MQTT Topic Structure
 ## Topic hierarchy
 
 ```
@@ -163,7 +199,7 @@ Devices MUST subscribe to: `iot/{site}/{location}/{device_id}/commands/#`
 - `update_config`  Update device configuration.
 
 
-## 5. QoS and Delivery Semantics
+## 7. QoS and Delivery Semantics
 
 - **QoS**: 1 (at-least-once-delivery)
 - **Retained messages**:
@@ -172,7 +208,7 @@ Devices MUST subscribe to: `iot/{site}/{location}/{device_id}/commands/#`
     - `events` topic: NOT retained (transient alerts)
 - Consumers must tolerate duplicate messages
 
-## 6. Data Validation
+## 8. Data Validation
 
 ### Measurement Ranges
 Devices SHOULD validate measurements before publishing. Backend services MUST validate received data.
@@ -193,7 +229,7 @@ Devices SHOULD validate measurements before publishing. Backend services MUST va
 - Backend SHOULD reject messages with timestamp > 5 minutes in the future.
 - Backend SHOULD flag messages with timestamp > 1 hour in the past.
 
-## 7. Error Handling
+## 9. Error Handling
 
 ### Device-Side
 - **Connection Loss**: Buffer up to 10 measurements, publish on reconnection.
@@ -205,7 +241,7 @@ Devices SHOULD validate measurements before publishing. Backend services MUST va
 - **Missing Required Fields**: Log warning, attempt partial processing.
 - **Duplicate Messages**: Deduplicate using `timestamp` + `device_id` + `measurement` within 60-second window.
 
-## 8. Security
+## 10. Security
 
 ### Authentication
 - **MQTT Authentication**: All devices MUST authenticate using TLS client certificates or username/password.
@@ -262,7 +298,7 @@ hmac = HMAC-SHA256(canonical_string, shared_secret)
 - **Certificate Validation**: Devices MUST validate broker certificate
 
 
-## 9. Example Scenarios
+## 11. Example Scenarios
 
 **Architecture Overview:**
 ```
@@ -377,7 +413,7 @@ The IoT Gateway acts as a translator between BLE sensors and MQTT, managing conn
 4. Gateway updates and reboots
 5. Gateway reconnects and publishes: `{"state": "online", "firmware_version": "1.3.0", ...}`
 
-## 10. Configuration Reference
+## 12. Configuration Reference
 
 ### Timing Parameters
 | Parameter | Value | Configurable | Notes |
@@ -403,7 +439,7 @@ The IoT Gateway acts as a translator between BLE sensors and MQTT, managing conn
 | Shared secret size | 256 bits | 32 bytes |
 | Sequence number size | 32 bits | 0 to 4,294,967,295 |
 
-## 11. Troubleshooting
+## 13. Troubleshooting
 
 ### Common Issues
 
@@ -427,7 +463,7 @@ The IoT Gateway acts as a translator between BLE sensors and MQTT, managing conn
 - Check: MQTT broker load and network latency
 - Check: Gateway CPU usage during BLE scan bursts
 
-## 12. Version Migration
+## 14. Version Migration
 
 ### Upgrading from Draft to 1.0.0 (Future)
 
@@ -445,38 +481,3 @@ Devices running older firmware versions should:
 - Continue publishing to same topics (backward compatible)
 - Ignore unknown command types (forward compatible)
 - Log unsupported commands to events topic
-
-## Design Rationale
-
-### Why Topic-per-Measurement?
-
-**Advantages:**
-- Subscribers receive only needed data (e.q. dashboard subscribes to temperature only).
-- Easy to add new sensor types without schema changes.
-- Simplifies time-series database ingestion (one topic = one metric).
-- Granular QoS and retention policies per measurement type.
-- Better for MQTT wildcards and routing rules.
-
-**Trade-offs:**
-- Increased message volume (4 messages vs 1 batched).
-- Loss of atomic snapshots (measurements not guaranteed simultaneous).
-- Slightly higer network overhead.
-
-**Why Acceptable:**
-- WiFi gateway has sufficient bandwidth.
-- Measurement atomicity not critical for environmental monitoring.
-- Benefits outweigh costs for this use case.
-
-### Why HMAC Instead of JWT?
-
-**Reasons:**
-- 10x lighter on ESP32 resources.
-- Faster verification. 
-- Simpler implementation, fewer dependencies.
-- Sufficient security for trusted network deployment.
-
-** When to upgrade to JWT:**
-- If commands need to carry user identity/roles.
-- If gateway needs to verify command from multiple backends.
-
-
