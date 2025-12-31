@@ -1,9 +1,35 @@
 # Telemetry Data Model and Topic Contract
 
+## Document Version
+- **Version**: 1.0.0-draft
+- **Last Updated**: 31.12.2025
+- **Status**: Draft
+
+## Version History
+| Version | Date | Changes | Status |
+|---------|------|---------|--------|
+| 1.0.0-draft | 31.12.2025 | Initial version | Draft
+
+## Breaking Changes Policy
+- Major version increment (X.0.0): Breaking changes to topic structure or required fields data.
+- Minor version increment (1.X.0): New optional fields or topics.
+- Patch version increment (1.0.X): Documentation clarification only.
+
 ## 1. Introduction
 This document describes the telemetry data model and MQTT topic structure used between IoT devices and the IoT Backend.
 
 The goal is to define a clear and stable contract that allows devices, backend services, and data processors to interoperate reliably. 
+
+## 1.1 Glossary
+
+- **ACL**: Access Control List - defines who can publish/subscribe to which topics
+- **BLE**: Bluetooth Low Energy - wireless protocol used by sensors
+- **HMAC**: Hash-based Message Authentication Code - cryptographic signature
+- **LWT**: Last Will and Testament - MQTT feature for automatic offline messages
+- **NVS**: Non-Volatile Storage - persistent storage on ESP32
+- **QoS**: Quality of Service - MQTT message delivery guarantee level
+- **RTC**: Real-Time Clock - hardware clock for accurate timekeeping
+- **TLS**: Transport Layer Security - encryption protocol for MQTT
 
 ## 2. Telemetry Data model
 Each sensor publishes its measurements to a dedicated MQTT topic. This simplifies device firmware and topic-based routing at the cost of increased message volume and reduced measurement atomicity.
@@ -54,20 +80,403 @@ Each sensor publishes its measurements to a dedicated MQTT topic. This simplifie
 **Control & Lifecycle topics**
 - `status` - Device lifecycle state (online/offline).
 - `events` - Errors or warnings.
-- `commands` - Backend-to-device messages
+- `commands` - Backend-to-device messages.
+
+### Status Topic
+**Topic**: `iot/{site}/{location}/{device_id}/status`
+
+**Payload**
+```json
+{
+    "state": "online",
+    "timestamp": "2025-01-01T12:34:56Z",
+    "uptime_seconds": 86400,
+    "firmware_version": "1.2.3"
+}
+```
+
+**Valid states**: `online`, `offline`, `error`
+
+**Last Will and Testament (LWT)**: Device MUST set LWT message:
+```json
+{
+    "state": "offline",
+    "timestamp": "2025-01-01T12:34:56Z"
+}
+```
+
+This message is published by the broker if the device disconnects unexpectedly.
+
+### Events Topic
+**Topic**: `iot/{site}/{location}/{device_id}/events`
+
+**Payload**
+```json
+{
+    "event_type": "sensor_failure",
+    "severity": "warning",
+    "message": "Temperature sensor read timeout",
+    "timestamp": "2025-01-01T12:34:56Z"
+}
+```
+
+**Severity Levels**: `info`, `warning`, `error`, `critical`
+
+**Common event types**:
+- `sensor_failure` - Sensor hardware issue
+- `calibration_drift` - Measurement out of expected range.
+- `low_battery` - Battery voltage below threshold.
+- `connectivity_degraded` - Poor BLE signal quality.
+
+### Commands Topic
+Devices MUST subscribe to: `iot/{site}/{location}/{device_id}/commands/#`
+
+**Command structure**:
+```json
+{
+    "command": "set_interval",
+    "parameters": {
+        "seconds": 300
+    },
+    "request_id": "cmd-12345",
+    "seq": 12345,
+    "hmac": "a3f5b2c1d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2"
+}
+```
+
+**Response topic**: `iot/{site}/{location}/{device_id}/commands/response`
+
+**Response payload**:
+```json
+{
+    "request_id": "cmd-12345",
+    "seq": 12345,
+    "status": "success",
+    "message": "Interval updated to 300 seconds",
+    "timestamp": "2025-01-01T12:34:56Z" 
+}
+```
+
+**Supported commands**:
+- `set_interval` - Change measurement interval.
+- `restart` - Restart device.
+- `update_config`  Update device configuration.
+
 
 ## 5. QoS and Delivery Semantics
 
 - **QoS**: 1 (at-least-once-delivery)
+- **Retained messages**:
+    - Measurement topics: NOT retained (time-series data)
+    - `status` topic: RETAINED (last-will testament, current device state)
+    - `events` topic: NOT retained (transient alerts)
 - Consumers must tolerate duplicate messages
-- Messages are not retained unless explicitly stated
+
+## 6. Data Validation
+
+### Measurement Ranges
+Devices SHOULD validate measurements before publishing. Backend services MUST validate received data.
+
+| Measurement | Valid Range | Unit | Precision |
+|------------|-------------|------|-----------|
+| temperature| -40 to 85 | C | 0.01 |
+| humidity | 0 to 100 | % | 0.01 |
+| pressure | 300 to 1100 | hPa | 0.001|
+| voltage | 0 to 3.7 | V | 0.01 |
+
+**Out-of-range behavior**:
+- Device: Publish event with `severity: warning`
+- Backend: Flag data point, do not discard (could indicate actual extreme conditions)
+
+### Timestamp validation
+- MUST be ISO 8601 format with timezone (UTC preferred).
+- Backend SHOULD reject messages with timestamp > 5 minutes in the future.
+- Backend SHOULD flag messages with timestamp > 1 hour in the past.
+
+## 7. Error Handling
+
+### Device-Side
+- **Connection Loss**: Buffer up to 10 measurements, publish on reconnection.
+- **Publish Failure**: Retry up to 3 times with exponential backoff.
+- **Invalid Measurement**: Log locally, publish event, do not publish measurement.
+
+### Backend-Side
+- **Malformed JSON**: Log error, increment metrics, discard message.
+- **Missing Required Fields**: Log warning, attempt partial processing.
+- **Duplicate Messages**: Deduplicate using `timestamp` + `device_id` + `measurement` within 60-second window.
+
+## 8. Security
+
+### Authentication
+- **MQTT Authentication**: All devices MUST authenticate using TLS client certificates or username/password.
+- **Device Identity**: Each device has a unique `device_id` that matches its MQTT
+
+### Authorization (ACL - Access Control Lists)
+
+**Device Permissions:**
+Devices can only publish/subscribe to their own topics:
+| Role | Allowed Topics (Publish) | Allowed Topics (Subscribe) |
+|------|--------------------------|----------------------------|
+| Device | `iot/{site}/{location}/{device_id}/#` | `iot/{site}/{location}/{device_id}/commands/#` |
+| Gateway | `iot/{site}/{location}/+/#` | `iot/{site}/{location}/+/commands/#` |
+| Backend | `iot/#` | `iot/#` |
+| Dashboard | None | `iot/{site}/{location}/+/temperature` <br> `iot/{site}/{location}/+/humidity` |
+
+**Command Authorization:**
+Due to resource constrains, commands use **HMAC-SHA256** authentication.
+
+**Command structure:**
+```json
+{
+    "command": "set_interval",
+    "parameters": {
+        "seconds": 300
+    },
+    "request_id": "cmd-12345",
+    "seq": 12345,
+    "hmac": "a3f5b2c1d4e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b1c2d3e4f5a6b7c8d9e0f1a2"
+}
+```
+
+**HMAC calculation:**
+```
+canonical_string = command + "|" + request_id + "|" + seq
+hmac = HMAC-SHA256(canonical_string, shared_secret)
+```
+
+**Gateway verification:**
+1. Check sequence number > last seen (prevents replay attacks)
+2. Recalculate HMAC using shared secret
+3. Compare calculated HMAC with received HMAC
+4. If match, execute command and update last_seq
+
+**Security properties:**
+- Shared secret is stored securely in ESP32 NVS (encrypted flash)
+- Sequence numbers prevent replay attacks
+- HMAC prevents command tampering
+- Only backend knows the shared secret (can generate valid HMACs)
+
+### Transport Security
+- **TLS/SSL**: MQTT MUST use TLS 1.2 or higher (mqtts://)
+- **Port**: 8883 (MQTT over TLS)
+- **Certificate Validation**: Devices MUST validate broker certificate
+
+
+## 9. Example Scenarios
+
+**Architecture Overview:**
+```
+BLE Sensor -> IoT Gateway (WiFi) -> MQTT Broker -> Backed
+```
+
+The IoT Gateway acts as a translator between BLE sensors and MQTT, managing connectivity and message transformation.
+
+### Scenario 1: IoT Gateway and Sensor Startup
+
+**Gateway startup:**
+1. Gateway connects to MQTT broker via WiFi
+2. Sets LWT: `iot/cottage/greenhouse/gateway-001/status` → `{"state": "offline", ...}`
+3. Publishes: `iot/cottage/greenhouse/gateway-001/status` → `{"state": "online", ...}` (retained)
+4. Subscribes to: `iot/cottage/greenhouse/+/commands/#` (all devices it manages)
+5. Begins BLE scanning for known sensor MAC addresses
+
+**Sensor detection:**
+1. Gateway detects BLE sensor (device-001) advertisement
+2. Gateway publishes: `iot/cottage/greenhouse/device-001/status` → `{"state": "online", ...}` (retained)
+3. Gateway begins collecting BLE data from sensor every 5 minutes
+4. Gateway transforms and publishes measurements to MQTT
+
+### Scenario 2: Normal Operation (BLE → Gateway → MQTT)
+
+**Data flow:**
+1. BLE sensor broadcasts advertisement with batched measurements:
+```
+   {temp: 24.04, humidity: 40.04, pressure: 1014.5, voltage: 3.17}
+```
+
+2. Gateway receives BLE data and publishes to separate MQTT topics:
+```
+   iot/cottage/greenhouse/device-001/temperature → {"value": 24.04, ...}
+   iot/cottage/greenhouse/device-001/humidity → {"value": 40.04, ...}
+   iot/cottage/greenhouse/device-001/pressure → {"value": 1014.5, ...}
+   iot/cottage/greenhouse/device-001/voltage → {"value": 3.17, ...}
+```
+
+3. Gateway adds timestamp (gateway's time, not sensor's, as BLE sensors typically lack RTC)
+
+### Scenario 3: Sensor Connectivity Loss
+
+1. Gateway hasn't received BLE data from device-001 for 15 minutes (3 consecutive missed intervals)
+2. Gateway publishes: 
+```
+   iot/cottage/greenhouse/device-001/status → {"state": "offline", ...}
+   iot/cottage/greenhouse/gateway-001/events → {
+     "event_type": "sensor_lost",
+     "severity": "warning",
+     "message": "BLE sensor device-001 not responding",
+     "affected_device": "device-001"
+   }
+```
+3. Gateway continues scanning for the sensor
+4. When sensor reappears, gateway publishes status online and resumes data
+
+### Scenario 4: Gateway Connectivity Loss
+
+1. Gateway loses WiFi connection (power outage, network issue)
+2. MQTT broker publishes gateway's LWT automatically:
+```
+   iot/cottage/greenhouse/gateway-001/status → {"state": "offline", ...}
+```
+3. All sensors managed by gateway-001 are implicitly offline
+4. Backend marks all gateway-001 managed devices as unavailable
+5. When gateway reconnects, it republishes online status and resumes operation
+
+### Scenario 5: Backend Command to Sensor via Gateway
+
+**Command flow:** Backend → MQTT → Gateway → BLE → Sensor
+
+1. Backend publishes command:
+```
+   Topic: iot/cottage/greenhouse/device-001/commands
+   Payload: {
+  "command": "set_interval",
+  "parameters": {"seconds": 300},
+  "request_id": "cmd-12345",
+  "seq": 12345,
+  "hmac": "a3f5b2c1d4e6..."
+}
+```
+
+2. Gateway receives command (subscribed to `iot/cottage/greenhouse/+/commands/#`)
+3. Gateway validates HMAC (verifies sequence number and signature)
+4. Gateway translates MQTT command to BLE write operation
+5. Gateway sends BLE command to device-001
+6. Sensor acknowledges via BLE
+7. Gateway publishes response:
+```
+   Topic: iot/cottage/greenhouse/device-001/commands/response
+   Payload: {
+     "request_id": "cmd-12345",
+     "status": "success",
+     "message": "Interval updated via BLE"
+   }
+```
+
+### Scenario 6: Gateway Firmware Update
+
+1. Backend publishes gateway command:
+```
+   iot/cottage/greenhouse/gateway-001/commands → {
+     "command": "update_firmware",
+     "parameters": {"url": "https://..."},
+     "request_id": "cmd-67890"
+   }
+```
+2. Gateway downloads firmware
+3. Gateway publishes: `iot/cottage/greenhouse/gateway-001/status` → `{"state": "updating", ...}`
+4. Gateway updates and reboots
+5. Gateway reconnects and publishes: `{"state": "online", "firmware_version": "1.3.0", ...}`
+
+## 10. Configuration Reference
+
+### Timing Parameters
+| Parameter | Value | Configurable | Notes |
+|-----------|-------|--------------|-------|
+| Measurement interval | 300 seconds | Yes | Via `set_interval` command |
+| Sensor offline timeout | 900 seconds (15 min) | No | 3 missed intervals |
+| Command timeout | 30 seconds | No | Max time for command response |
+| Timestamp freshness | 300 seconds | No | Commands older than 5 min rejected |
+
+### Network Parameters
+| Parameter | Value | Notes |
+|-----------|-------|-------|
+| MQTT QoS | 1 | At-least-once delivery |
+| MQTT Port | 8883 | TLS encrypted |
+| Keep-alive | 60 seconds | MQTT ping interval |
+| Message buffer size | 10 messages | Gateway buffer during offline |
+
+### Security Parameters
+| Parameter | Value | Notes |
+|-----------|-------|-------|
+| TLS version | 1.2+ | Minimum required |
+| HMAC algorithm | SHA-256 | 256-bit hash |
+| Shared secret size | 256 bits | 32 bytes |
+| Sequence number size | 32 bits | 0 to 4,294,967,295 |
+
+## 11. Troubleshooting
+
+### Common Issues
+
+**Sensor shows offline but is broadcasting BLE**
+- Check: Gateway is scanning correct BLE MAC address
+- Check: BLE signal strength (RSSI > -80 dBm)
+- Check: Gateway within 10m range of sensor
+
+**Commands not executing**
+- Check: Sequence number is incrementing (not replay)
+- Check: HMAC signature is valid
+- Check: Command timestamp is within 5-minute window
+- Check: Gateway subscribed to correct command topic
+
+**Duplicate measurements in backend**
+- Expected behavior with QoS 1
+- Backend should deduplicate using timestamp + device_id
+
+**High message latency**
+- Check: WiFi signal strength at gateway
+- Check: MQTT broker load and network latency
+- Check: Gateway CPU usage during BLE scan bursts
+
+## 12. Version Migration
+
+### Upgrading from Draft to 1.0.0 (Future)
+
+**Breaking changes:** None (first release)
+
+**Deployment steps:**
+1. Update backend to support new schema
+2. Deploy updated gateway firmware (OTA)
+3. Verify all devices reporting correctly
+4. Update documentation status to "Active"
+
+### Future Compatibility
+
+Devices running older firmware versions should:
+- Continue publishing to same topics (backward compatible)
+- Ignore unknown command types (forward compatible)
+- Log unsupported commands to events topic
 
 ## Design Rationale
 
-A topic-per-measurement model was chosen to:
-- Simplify device firmware
-- Enable selective data forwarding to external systems
-- Improve extensibility when adding new sensors
-- Reduce payload redundancy by encoding metadata in topic hierarchy
+### Why Topic-per-Measurement?
 
-This approach increases message volume and reduces measurement atomicity, which is acceptable for the intended deployment scale and learning goals of this project.
+**Advantages:**
+- Subscribers receive only needed data (e.q. dashboard subscribes to temperature only).
+- Easy to add new sensor types without schema changes.
+- Simplifies time-series database ingestion (one topic = one metric).
+- Granular QoS and retention policies per measurement type.
+- Better for MQTT wildcards and routing rules.
+
+**Trade-offs:**
+- Increased message volume (4 messages vs 1 batched).
+- Loss of atomic snapshots (measurements not guaranteed simultaneous).
+- Slightly higer network overhead.
+
+**Why Acceptable:**
+- WiFi gateway has sufficient bandwidth.
+- Measurement atomicity not critical for environmental monitoring.
+- Benefits outweigh costs for this use case.
+
+### Why HMAC Instead of JWT?
+
+**Reasons:**
+- 10x lighter on ESP32 resources.
+- Faster verification. 
+- Simpler implementation, fewer dependencies.
+- Sufficient security for trusted network deployment.
+
+** When to upgrade to JWT:**
+- If commands need to carry user identity/roles.
+- If gateway needs to verify command from multiple backends.
+
+
