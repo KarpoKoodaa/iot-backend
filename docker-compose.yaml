@@ -37,7 +37,8 @@ services:
     restart: unless-stopped
      
   node-red:
-    image: nodered/node-red:latest
+    build: 
+      context: ./node-red
     container_name: node-red
     environment:
       - TZ=Europe/Helsinki
