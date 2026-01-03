@@ -109,6 +109,8 @@ All persistent data is stored on an external SSD mounted at:
 **MQTT Access**
 - Anonymous access: disabled.
 - Authentication: user/pass.
+- Credentials stored in a persistent password file.
+- User management is performed using mosquitto_passwd via Docker.
 - TLS: No
 
 Security configuration reflects current development phase.
