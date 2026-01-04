@@ -1,5 +1,5 @@
 # Runtime Environment 
-This documentation describes how the IoT Backend Platfrom runs in practice:
+This documentation describes how the IoT Backend Platform runs in practice:
 what services are running, how they are started, how they store data, and how they are accessed.
 
 ## 1. Scope and Assumptions
@@ -53,7 +53,7 @@ All services run on a single host and communicate over a private Docker network.
 | Service | Port | Protocol | Access Scope | Notes |
 |---------|------|----------|--------------|-------|
 | Mosquitto | 1883 | MQTT | Local LAN | No TLS (dev) |
-| Mode-RED | 1880 | HTTP | Local LAN | Admin UI |
+| Node-RED | 1880 | HTTP | Local LAN | Admin UI |
 | InfluxDB | 8086 | HTTP  Local host / LAN | API |
 | Grafana | 3000 | HTTP | Local LAN | Dashboards |
 
@@ -64,7 +64,7 @@ Ports are restricted at the firewall level (UFW).
 **Storage Location**
 All persistent data is stored on an external SSD mounted at:
 ```
-/mount/iot-data
+/mnt/iot-data
 ```
 **Volume Mapping**
 | Service | Path in Container | Host Path |
@@ -88,10 +88,10 @@ All persistent data is stored on an external SSD mounted at:
 - Runtime state and generated data must not be committed.
 
 
-## 7. Secrets Management
+## 8. Secrets Management
 
 **Current Approach**
-- Serects are injected via:
+- Secrets are injected via:
     - ```.env``` file.
     - Docker environment variables.
 
@@ -114,6 +114,8 @@ All persistent data is stored on an external SSD mounted at:
 - TLS: No
 
 Security configuration reflects current development phase.
+
+NOTE: MQTT users are managed while the Mosquitto container is stopped. The password file is treated as immutable at the runtime.
 
 ## 10. Startup and Restart Behavior
 
