@@ -10,6 +10,7 @@ services:
       - /mnt/iot-data/mqtt/data:/mosquitto/data
       - /mnt/iot-data/mqtt/log:/mosquitto/log
       - /mnt/iot-data/mqtt/secrets:/mosquitto/secrets:ro
+      - ./mqtt/acl/acl.conf:/mosquitto/config/acl.conf:ro
     networks:
       - iot-net
     restart: unless-stopped
