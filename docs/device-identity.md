@@ -1,15 +1,16 @@
 # IoT Gateway Identity and Authorization Model
 
 ## Document Version
-- **Version**: 1.0.0-rc1
+- **Version**: 1.0.0
 - **Last Updated**: 5.1.2026
-- **Status**: Release Candidate
+- **Status**: Released
 
 ## Version History
 | Version | Date | Changes | Status |
 |---------|------|---------|--------|
 | 1.0.0-draft | 4.1.2026 | Initial version | Draft
 | 1.0.0-rc1 | 5.1.2026 | Updated Telemetry Data Model |
+| 1.0.0 | 5.1.2026 | Released |
 
 ## Breaking Changes Policy
 - Major version increment (X.0.0): Breaking changes to topic structure or required fields data.
