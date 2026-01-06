@@ -34,8 +34,8 @@ The goal is to define a clear and stable contract that allows IoT Gateways, back
 - **TLS**: Transport Layer Security - encryption protocol for MQTT
 
 ## 2. Related Documentation
-- [Architecture Overview](../architecture.md)
-- [Gateway Identity and Authorization Model](../device-identity.md)
+- [Architecture Overview](./architecture.md)
+- [Gateway Identity and Authorization Model](./device-identity.md)
 
 ## 3. Design Rationale
 

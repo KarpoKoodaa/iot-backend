@@ -28,7 +28,7 @@ The goal is to ensure:
 
 ## 2. Related Documentation
 - [Architecture Overview](./architecture.md)
-- [Telemetry Data Model and Topic Contract](./data_models/telemetry_model.md)
+- [Telemetry Data Model and Topic Contract](./telemetry_model.md)
 
 ## 3. Identity Model
 

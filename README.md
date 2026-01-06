@@ -11,7 +11,7 @@ The system is fully containerized using Docker compose, allowing easy developmen
     Secure device-to-cloud communication using MQTT with TLS/mTLS.
 
 - **Node-RED**
-    Flow-based logic, device processing, automation, and routin between services.
+    Flow-based logic, device processing, automation, and routing between services.
 
 - **InfluxDB**
     Time-series database for sensor data.
@@ -21,17 +21,42 @@ The system is fully containerized using Docker compose, allowing easy developmen
 
 ---
 ## Documentation
-See the docs/ folder for:
-    - Architecture diagram
-    - Device identity model
-    - OTA update flow
-    - Deployment notes.
+
+The documents below defines the architecture, runtime, data contracts, and security model.
+
+### Core Documentation
+
+- **Architecture Overview**
+  - [`docs/architecture.md`](docs/architecture.md)
+  - High-level system design, trust boundaries, and component responsibilities.
+
+- **Runtime Environment**
+  - [`docs/runtime.md`](docs/runtime.md)
+  - How the platform runs in practice (Docker, persistence, startup, operations).
+
+- **Telemetry Data Model & Topic Contract**
+  - [`docs/telemetry_model.md`](docs/telemetry_model.md)
+  - MQTT topic structure, payload formats, QoS rules, and lifecycle semantics.
+
+- **IoT Gateway Identity & Authorization Model**
+  - [`docs/device-identity.md`](docs/device-identity.md)
+  - MQTT authentication, ACL rules, gateway trust model, and onboarding.
+
+---
+### Document Relationships
+
+- Architecture defines *what exists* and *why*
+- Telemetry Model defines *what data flows*
+- Identity Model defines *who may publish/subscribe*
+- Runtime defines *how everything is executed*
+
+All documents are versioned and evolve independently.
 
 ---
 ## License
 MIT License
 
-Copyright (c) [2025] [Kariantti Laitala]
+Copyright (c) [2026] [Kariantti Laitala]
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
