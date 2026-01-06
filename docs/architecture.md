@@ -27,3 +27,21 @@ This view provides a breakdown of the major containers:
 - InfluxDB (telemetry storage)
 - Mosquitto MQTT broker
 - Grafana dashboards
+
+
+## Related Documents
+
+This document provides the high-level system design.
+Detailed specifications are defined in the following documents:
+
+- **Telemetry Data Model & Topic Contract**
+  - Defines MQTT topic hierarchy, payload schemas, and delivery semantics.
+  - See: `telemetry_model.md`
+
+- **Gateway Identity & Authorization Model**
+  - Defines gateway authentication, ACL rules, and trust boundaries.
+  - See: `device-identity.md`
+
+- **Runtime Environment**
+  - Describes how the system is deployed and operated.
+  - See: `runtime.md`

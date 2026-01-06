@@ -1,37 +1,58 @@
-# Device Identity and Authorization Model
+# IoT Gateway Identity and Authorization Model
+
+## Document Version
+- **Version**: 1.0.0
+- **Last Updated**: 5.1.2026
+- **Status**: Released
+
+## Version History
+| Version | Date | Changes | Status |
+|---------|------|---------|--------|
+| 1.0.0-draft | 4.1.2026 | Initial version | Draft
+| 1.0.0-rc1 | 5.1.2026 | Updated Telemetry Data Model |
+| 1.0.0 | 5.1.2026 | Released |
+
+## Breaking Changes Policy
+- Major version increment (X.0.0): Breaking changes to topic structure or required fields data.
+- Minor version increment (1.X.0): New optional fields or topics.
+- Patch version increment (1.0.X): Documentation clarification only.
 
 ## 1. Purpose
-This document defines how to IoT devices are identified, authenticated, and authorized within the IoT Backend Platform.
+This document defines how IoT Gateways are identified, authenticated, and authorized within the IoT Backend Platform.
 
 The goal is to ensure: 
-- Each device has a unique identity.
-- Devices can only access their own data.
+- Each IoT Gateway has a unique identity.
+- IoT Gateway can only access their own data.
 - Backend services have appropriate elevated accesses.
 - The system follows least-privilege principles.
 
-## 2. Identity Model
+## 2. Related Documentation
+- [Architecture Overview](./architecture.md)
+- [Telemetry Data Model and Topic Contract](./telemetry_model.md)
 
-### Device Identity
+## 3. Identity Model
 
-Each IoT device is identified by:
+### IoT Gateway Identity
+
+Each IoT Gateway is identified by:
 
 | Attribute | Description |
 |-----------|-------------|
 | Username | Primary identity used for MQTT authentication |
 | Password | Shared secret stored in Mosquitto password file |
-| Device ID | Must match the MQTT username |
+| Gateway ID | Must match the MQTT username |
 | MQTT Client ID | Arbitrary, not trusted for identity |
 
 **Rule:**
 
-    MQTT username MUST equal the device_id used in MQTT topics.
+    MQTT username MUST equal the gateway_id used in MQTT topics.
 Example:
 ```
-Username: device-0001
-Topic: iot/site/location/device-001/temperature
+Username: gw-01
+Topic: iot/site/gw-01/location/device-001/temperature
 ```
 
-## 3. Authentication
+## 4. Authentication
 
 ### Mechanism
 - Protocol: MQTT
@@ -41,7 +62,7 @@ Topic: iot/site/location/device-001/temperature
 
 Credentials are validated against a Mosquitto password file.
 
-## 4. Authorization (ACL)
+## 5. Authorization (ACL)
 Authorization is enforced using Mosquitto ACL rules.
 
 ### Device Permissions
@@ -54,8 +75,8 @@ Each device:
 **Allowed topics**
 
 ```
-iot/{site}/{location}/{device_id}/+
-iot/{site}/{location}/{device_id}/commands/#
+iot/{site}/{gateway_id}/{location}/{device_id}/+
+iot/{site}/{gateway_id}/{location}/{device_id}/commands/#
 ``` 
 
 ### Backend Permissions (Node-RED)
@@ -67,7 +88,7 @@ Capabilities:
 - Publish events
 - Debug and test flows
 
-## 5. ACL Configuration
+## 6. ACL Configuration
 Example ACL file:
 ```conf
 # Node-RED backend
@@ -75,20 +96,20 @@ user nodered
 topic readwrite #
 
 # Device access
-pattern write iot/+/+/%u/+
-pattern read  iot/+/+/%u/commands/#
+pattern write iot/+/%u/+/+/#
+pattern read  iot/+/%u/+/#/commands/#
 ```
 
-## 6. Device Onboarding Process
+## 7. Device Onboarding Process
 
 1. Generate a unique device ID.
 2. Create MQTT credentials.
     ```
-    mosquitto_passwd /mosquitto/passwd_file device-001
+    mosquitto_passwd /mosquitto/passwd_file gw-01
     ```
 3. Flash credentials into device firmware.
 4. Device connects using:
-    - username = device_id
+    - username = gateway_id
     - password = generated secret
 5. ACL automatically enforces topic isolation.
 
