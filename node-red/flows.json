@@ -115,7 +115,7 @@
   },
   {
     "id": "influxdb-write",
-    "type": "influxdb out",
+    "type": "influxdb batch",
     "z": "tab-telemetry",
     "influxdb": "cfg-influxdb",
     "name": "Write to InfluxDB",
