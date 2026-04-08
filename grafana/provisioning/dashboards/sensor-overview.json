@@ -1,0 +1,180 @@
+{
+  "__inputs": [],
+  "__requires": [],
+  "annotations": { "list": [] },
+  "editable": false,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 10 },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {
+        "legend": { "calcs": ["last", "min", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_reading\")\n  |> filter(fn: (r) => r[\"measurement_type\"] == \"temperature\")\n  |> filter(fn: (r) => r[\"site\"] == \"${site}\")\n  |> filter(fn: (r) => r[\"gateway_id\"] == \"${gateway_id}\")\n  |> filter(fn: (r) => r[\"device_id\"] == \"${device_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Temperature",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 10 },
+          "unit": "humidity"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "id": 2,
+      "options": {
+        "legend": { "calcs": ["last", "min", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_reading\")\n  |> filter(fn: (r) => r[\"measurement_type\"] == \"humidity\")\n  |> filter(fn: (r) => r[\"site\"] == \"${site}\")\n  |> filter(fn: (r) => r[\"gateway_id\"] == \"${gateway_id}\")\n  |> filter(fn: (r) => r[\"device_id\"] == \"${device_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Humidity",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 10 },
+          "unit": "pressurehpa"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "id": 3,
+      "options": {
+        "legend": { "calcs": ["last", "min", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_reading\")\n  |> filter(fn: (r) => r[\"measurement_type\"] == \"pressure\")\n  |> filter(fn: (r) => r[\"site\"] == \"${site}\")\n  |> filter(fn: (r) => r[\"gateway_id\"] == \"${gateway_id}\")\n  |> filter(fn: (r) => r[\"device_id\"] == \"${device_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Pressure",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 10 },
+          "unit": "volt"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "id": 4,
+      "options": {
+        "legend": { "calcs": ["last", "min", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: v.timeRangeStart, stop: v.timeRangeStop)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"sensor_reading\")\n  |> filter(fn: (r) => r[\"measurement_type\"] == \"voltage\")\n  |> filter(fn: (r) => r[\"site\"] == \"${site}\")\n  |> filter(fn: (r) => r[\"gateway_id\"] == \"${gateway_id}\")\n  |> filter(fn: (r) => r[\"device_id\"] == \"${device_id}\")\n  |> filter(fn: (r) => r[\"_field\"] == \"value\")\n  |> aggregateWindow(every: v.windowPeriod, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Battery Voltage",
+      "type": "timeseries"
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "tags": ["iot", "sensors"],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+        "definition": "from(bucket: \"telemetry\") |> range(start: -30d) |> filter(fn: (r) => r._measurement == \"sensor_reading\") |> keep(columns: [\"site\"]) |> distinct(column: \"site\")",
+        "hide": 0,
+        "includeAll": false,
+        "name": "site",
+        "options": [],
+        "query": "from(bucket: \"telemetry\") |> range(start: -30d) |> filter(fn: (r) => r._measurement == \"sensor_reading\") |> keep(columns: [\"site\"]) |> distinct(column: \"site\")",
+        "refresh": 2,
+        "sort": 1,
+        "type": "query",
+        "label": "Site"
+      },
+      {
+        "current": {},
+        "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+        "definition": "from(bucket: \"telemetry\") |> range(start: -30d) |> filter(fn: (r) => r._measurement == \"sensor_reading\") |> filter(fn: (r) => r.site == \"${site}\") |> keep(columns: [\"gateway_id\"]) |> distinct(column: \"gateway_id\")",
+        "hide": 0,
+        "includeAll": false,
+        "name": "gateway_id",
+        "options": [],
+        "query": "from(bucket: \"telemetry\") |> range(start: -30d) |> filter(fn: (r) => r._measurement == \"sensor_reading\") |> filter(fn: (r) => r.site == \"${site}\") |> keep(columns: [\"gateway_id\"]) |> distinct(column: \"gateway_id\")",
+        "refresh": 2,
+        "sort": 1,
+        "type": "query",
+        "label": "Gateway"
+      },
+      {
+        "current": {},
+        "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+        "definition": "from(bucket: \"telemetry\") |> range(start: -30d) |> filter(fn: (r) => r._measurement == \"sensor_reading\") |> filter(fn: (r) => r.gateway_id == \"${gateway_id}\") |> keep(columns: [\"device_id\"]) |> distinct(column: \"device_id\")",
+        "hide": 0,
+        "includeAll": true,
+        "name": "device_id",
+        "options": [],
+        "query": "from(bucket: \"telemetry\") |> range(start: -30d) |> filter(fn: (r) => r._measurement == \"sensor_reading\") |> filter(fn: (r) => r.gateway_id == \"${gateway_id}\") |> keep(columns: [\"device_id\"]) |> distinct(column: \"device_id\")",
+        "refresh": 2,
+        "sort": 1,
+        "type": "query",
+        "label": "Device",
+        "includeAll": true,
+        "allValue": ".*"
+      },
+      {
+        "hide": 2,
+        "name": "DS_INFLUXDB",
+        "query": "influxdb",
+        "type": "datasource",
+        "label": "InfluxDB"
+      }
+    ]
+  },
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Sensor Overview",
+  "uid": "iot-sensor-overview",
+  "version": 1
+}
