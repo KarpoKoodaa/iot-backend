@@ -163,7 +163,7 @@
     "type": "tab",
     "label": "Email Alerts",
     "disabled": false,
-    "info": "Flow A: Twice-daily sensor summary email (08:00 and 20:00).\nFlow B: Watchdog — alerts if no data arrives for 1 hour.\nBoth send via Gmail. Configure credentials in the email node."
+    "info": "Flow A: Twice-daily sensor summary email (08:00 and 20:00).\nFlow B: Watchdog — alerts once when data stops for 1 hour, once when it resumes. State machine: no repeated emails.\nFlow C: MQTT heartbeat — updates gateway online state from retained status topic.\nBoth send via Gmail. Configure credentials in the email node."
   },
   {
     "id": "inj-report-08",
@@ -265,14 +265,14 @@
     "id": "fn-watchdog-check",
     "type": "function",
     "z": "tab-email-alerts",
-    "name": "Check & alert",
-    "func": "// Recipient is set on the email node itself (node config, not msg.to).\n// 4-hour cooldown between repeated alerts.\nconst ALERT_COOLDOWN_HOURS = 4;\n\nconst rows = msg.payload || [];\nconst total = rows.reduce((s, r) => s + (r._value || 0), 0);\n\nif (total > 0) {\n    // Data is flowing — clear alert state so next outage fires fresh\n    flow.set('alertSent', false);\n    return null;\n}\n\n// No data in last 1 hour — check cooldown\nconst lastSent = flow.get('lastAlertSent') || 0;\nconst hoursSince = (Date.now() - lastSent) / 3600000;\n\nif (hoursSince < ALERT_COOLDOWN_HOURS) {\n    return null;  // suppress: already alerted recently\n}\n\nflow.set('lastAlertSent', Date.now());\nflow.set('alertSent', true);\n\nconst sinceWhen = new Date(Date.now() - 3600000).toLocaleString('fi-FI', { timeZone: 'Europe/Helsinki' });\nmsg.topic = '⚠️ IoT Alert — No sensor data for 1+ hour';\nmsg.payload = `No sensor measurements have been received since ${sinceWhen} (EET).\\n\\nPlease check the gateway and sensor node.`;\nreturn msg;",
+    "name": "State machine: online ↔ offline",
+    "func": "// Alert ONCE on transition to offline, ONCE on recovery.\n// No repeated emails while in the same state.\nconst rows = msg.payload || [];\nconst total = rows.reduce((s, r) => s + (r._value || 0), 0);\nconst wasOnline = flow.get('gatewayOnline') !== false;  // default: assume online\n\nif (total > 0) {\n    if (!wasOnline) {\n        // Transition: offline → online\n        flow.set('gatewayOnline', true);\n        const now = new Date().toLocaleString('fi-FI', { timeZone: 'Europe/Helsinki' });\n        msg.topic   = '✅ IoT — Gateway back online';\n        msg.payload = `Sensor data is flowing again as of ${now} (EET).`;\n        return msg;\n    }\n    return null;  // still online, no email\n}\n\n// No data in last 1 hour\nif (wasOnline) {\n    // Transition: online → offline (first detection only)\n    flow.set('gatewayOnline', false);\n    const sinceWhen = new Date(Date.now() - 3600000).toLocaleString('fi-FI', { timeZone: 'Europe/Helsinki' });\n    msg.topic   = '⚠️ IoT Alert — No sensor data for 1+ hour';\n    msg.payload = `No sensor measurements have been received since ${sinceWhen} (EET).\\n\\nPlease check the gateway and sensor node.`;\n    return msg;\n}\nreturn null;  // still offline, already alerted",
     "outputs": 1,
     "noerr": 0,
     "initialize": "",
     "finalize": "",
     "libs": [],
-    "x": 630,
+    "x": 650,
     "y": 320,
     "wires": [["email-gmail-send"]]
   },
@@ -289,5 +289,36 @@
     "x": 840,
     "y": 200,
     "wires": []
+  },
+  {
+    "id": "mqtt-in-heartbeat",
+    "type": "mqtt in",
+    "z": "tab-email-alerts",
+    "name": "Gateway heartbeat",
+    "topic": "iot/+/+/_gateway/status",
+    "qos": "1",
+    "datatype": "json",
+    "broker": "broker-mqtt",
+    "nl": false,
+    "rap": true,
+    "rh": 2,
+    "x": 170,
+    "y": 440,
+    "wires": [["fn-heartbeat-state"]]
+  },
+  {
+    "id": "fn-heartbeat-state",
+    "type": "function",
+    "z": "tab-email-alerts",
+    "name": "Update gateway state from heartbeat",
+    "func": "// Update the shared online/offline state from the gateway's retained\n// status topic so the watchdog poll picks it up immediately on the\n// next 5-minute cycle.\nconst state = (msg.payload && msg.payload.state) || 'unknown';\nconst isOnline = state === 'online';\nflow.set('gatewayOnline', isOnline);\nnode.status({ fill: isOnline ? 'green' : 'red',\n              shape: 'dot',\n              text: state + ' ' + new Date().toLocaleTimeString('fi-FI') });\nreturn null;",
+    "outputs": 1,
+    "noerr": 0,
+    "initialize": "",
+    "finalize": "",
+    "libs": [],
+    "x": 430,
+    "y": 440,
+    "wires": [[]]
   }
 ]
