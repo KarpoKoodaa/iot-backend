@@ -1,16 +1,17 @@
 # Telemetry Data Model and Topic Contract
 
 ## Document Version
-- **Version**: 1.0.0
-- **Last Updated**: 5.1.2026
+- **Version**: 1.1.0
+- **Last Updated**: 9.5.2026
 - **Status**: Released
 
 ## Version History
 | Version | Date | Changes | Status |
 |---------|------|---------|--------|
-| 1.0.0-draft | 31.12.2025 | Initial version | Draft
-| 1.0.0-rc1 | 5.1.2026 | Updated Telemetry Data Model |
-| 1.0.0 | 5.1.2026 | Released |
+| 1.0.0-draft | 31.12.2025 | Initial version | Draft |
+| 1.0.0-rc1 | 5.1.2026 | Updated Telemetry Data Model | RC |
+| 1.0.0 | 5.1.2026 | Released | Released |
+| 1.1.0 | 9.5.2026 | Added registry management topics for NVS-based device registry | Released |
 
 ## Breaking Changes Policy
 - Major version increment (X.0.0): Breaking changes to topic structure or required fields data.
@@ -124,6 +125,10 @@ This hierarchy prioritizes security isolation at the IoT Gateway level while pre
 - `events` - Errors or warnings.
 - `commands` - Backend-to-device messages.
 
+**Gateway management topics** (new in 1.1.0)
+- `iot/{site}/{gateway_id}/_gateway/commands/registry` — Send device registry commands to the gateway.
+- `iot/{site}/{gateway_id}/_gateway/events/registry` — Registry command responses from the gateway.
+
 ### Status Topic
 
 #### IoT Gateway status topic
@@ -209,6 +214,53 @@ IoT Gateways MUST subscribe to: `iot/{site}/{gateway_id}/{location}/{device_id}/
 - `restart` - Restart device.
 - `update_config`  Update device configuration.
 
+
+### Registry Command Topic
+
+**Topic**: `iot/{site}/{gateway_id}/_gateway/commands/registry`
+
+Used to manage the gateway's NVS-backed device registry without reflashing firmware.
+
+**Supported actions:**
+
+Add or update a device:
+```json
+{"action": "add", "ble_name": "NewSensorNode", "device_id": "new-node-01", "location": "shed"}
+```
+
+Remove a device:
+```json
+{"action": "remove", "ble_name": "NewSensorNode"}
+```
+
+List all registered devices:
+```json
+{"action": "list"}
+```
+
+**Response topic**: `iot/{site}/{gateway_id}/_gateway/events/registry`
+
+Success response (add/remove):
+```json
+{"status": "ok"}
+```
+
+Success response (list):
+```json
+{"status": "ok", "entries": [{"ble_name": "GreenhouseNode", "device_id": "greenhouse-node-01", "location": "greenhouse"}]}
+```
+
+Error response:
+```json
+{"status": "error", "message": "remove requires ble_name"}
+```
+
+**QoS**: 0 (fire-and-forget — check the response topic to confirm success).
+
+**Notes:**
+- Changes persist to ESP32 NVS flash and survive reboots.
+- The updated registry takes effect on the next BLE scan cycle.
+- The `ble_name` field must match exactly what the sensor advertises over BLE.
 
 ## 7. QoS and Delivery Semantics
 

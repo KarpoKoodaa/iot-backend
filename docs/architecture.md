@@ -29,6 +29,17 @@ This view provides a breakdown of the major containers:
 - Grafana dashboards
 
 
+## Deployed Sensor Nodes
+
+| Node | Firmware repo | BLE name | Device ID | Location | Gateway |
+|------|--------------|----------|-----------|----------|---------|
+| Smart Garden Node | `smart-garden-node/` | `SmartGardenNode` | `garden-node-01` | `inside` | `gw-01` |
+| Greenhouse Node | `greenhouse-node/` | `GreenhouseNode` | `greenhouse-node-01` | `greenhouse` | `gw-01` |
+
+Both nodes use the same BLE contract (service `0x180A`, char `0x2A6E`, packed `sensor_data_t`). All nodes communicate exclusively with the gateway over BLE. The gateway holds the MQTT identity and is the only device that speaks to the backend.
+
+To add a new sensor node: see **§8 Adding a New Sensor Node** in `device-identity.md`.
+
 ## Related Documents
 
 This document provides the high-level system design.
