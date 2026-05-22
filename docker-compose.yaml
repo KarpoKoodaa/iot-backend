@@ -44,6 +44,9 @@ services:
     container_name: node-red
     environment:
       - TZ=Europe/Helsinki
+      - OWM_API_KEY=${OWM_API_KEY}
+      - OWM_LAT=${OWM_LAT}
+      - OWM_LON=${OWM_LON}
     ports:
       - "1880:1880"
     volumes:
