@@ -96,6 +96,40 @@ Topic segments are parsed to extract tags. Timestamp comes from the payload `tim
 
 ---
 
+## Git Workflow
+
+### Branching
+- Before starting ANY change, create a new git branch from `main`.
+- Branch naming: `feature/<short-description>`, `fix/<short-description>`, or `chore/<short-description>`.
+- Never commit directly to `main` or `master`.
+- Examples:
+  - `git checkout -b fix/mosquitto-acl-gateway-isolation`
+  - `git checkout -b feature/add-grafana-temperature-dashboard`
+  - `git checkout -b chore/upgrade-influxdb-image`
+
+### Commit messages
+Follow conventional commits — keep the subject line under 72 characters:
+- `feat: add Node-RED flow for battery voltage alerts`
+- `fix: correct ACL pattern for multi-site gateways`
+- `chore: pin Mosquitto image to 2.0.18`
+
+### Before committing
+Local checks (always run before committing):
+1. Validate the compose file: `docker compose config`
+2. If you changed a doc in `docs/`, update its version field (`draft` → `rc` → `release`).
+3. If you changed Node-RED flows, export the updated `flows.json` before committing.
+
+Remote checks (run on the Raspberry Pi after deploying):
+4. If you changed Mosquitto config or ACL: `docker compose restart mosquitto` and verify a gateway can connect.
+5. If you changed Node-RED flows: `docker compose logs -f nodered` and confirm messages are processed.
+6. If you changed `docker-compose.yaml`: `docker compose up -d` and confirm all containers reach healthy state.
+
+### Never commit
+- `.env` — holds InfluxDB token, MQTT passwords, Grafana admin credentials
+- `mqtt/passwd_file` — managed inside the container via `mosquitto_passwd`
+
+---
+
 ## Documentation
 
 All docs are versioned (`draft` → `rc` → `release`). Do not change topic structure or payload format without updating `docs/telemetry_model.md` first — the gateway firmware depends on it.
