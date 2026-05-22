@@ -103,6 +103,6 @@ All docs are versioned (`draft` → `rc` → `release`). Do not change topic str
 | Doc | Current state |
 |---|---|
 | `architecture.md` | release |
-| `telemetry_model.md` | rc → release pending |
-| `device-identity.md` | rc → release pending |
+| `telemetry_model.md` | release |
+| `device-identity.md` | release |
 | `runtime.md` | release |
