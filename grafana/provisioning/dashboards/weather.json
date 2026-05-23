@@ -1,0 +1,595 @@
+{
+  "__inputs": [],
+  "__requires": [],
+  "annotations": { "list": [] },
+  "editable": false,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "celsius", "mappings": [] },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "orientation": "auto", "textMode": "auto", "colorMode": "none",
+        "graphMode": "none", "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -2h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_current\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temperature\")\n  |> last()",
+          "refId": "A"
+        }
+      ],
+      "title": "Temperature",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "celsius", "mappings": [] },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 4, "y": 0 },
+      "id": 2,
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "orientation": "auto", "textMode": "auto", "colorMode": "none",
+        "graphMode": "none", "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -2h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_current\")\n  |> filter(fn: (r) => r[\"_field\"] == \"feels_like\")\n  |> last()",
+          "refId": "A"
+        }
+      ],
+      "title": "Feels Like",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "percent", "mappings": [] },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 8, "y": 0 },
+      "id": 3,
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "orientation": "auto", "textMode": "auto", "colorMode": "none",
+        "graphMode": "none", "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -2h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_current\")\n  |> filter(fn: (r) => r[\"_field\"] == \"humidity\")\n  |> last()",
+          "refId": "A"
+        }
+      ],
+      "title": "Humidity",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "velocityms", "mappings": [] },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 12, "y": 0 },
+      "id": 4,
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "orientation": "auto", "textMode": "auto", "colorMode": "none",
+        "graphMode": "none", "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -2h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_current\")\n  |> filter(fn: (r) => r[\"_field\"] == \"wind_speed\")\n  |> last()",
+          "refId": "A"
+        }
+      ],
+      "title": "Wind Speed",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "degree", "mappings": [] },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 16, "y": 0 },
+      "id": 5,
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "orientation": "auto", "textMode": "auto", "colorMode": "none",
+        "graphMode": "none", "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -2h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_current\")\n  |> filter(fn: (r) => r[\"_field\"] == \"wind_direction\")\n  |> last()",
+          "refId": "A"
+        }
+      ],
+      "title": "Wind Direction",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "lengthmm", "mappings": [] },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 4, "x": 20, "y": 0 },
+      "id": 6,
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "orientation": "auto", "textMode": "auto", "colorMode": "none",
+        "graphMode": "none", "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -2h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_current\")\n  |> filter(fn: (r) => r[\"_field\"] == \"rain_1h\")\n  |> last()",
+          "refId": "A"
+        }
+      ],
+      "title": "Rain (last 1h)",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 10 },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "id": 7,
+      "options": {
+        "legend": { "calcs": ["last", "min", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -48h, stop: now())\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_current\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temperature\" or r[\"_field\"] == \"feels_like\")\n  |> aggregateWindow(every: 30m, fn: mean, createEmpty: false)\n  |> yield(name: \"mean\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Temperature History",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 10 },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "id": 8,
+      "options": {
+        "legend": { "calcs": ["min", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -30m, stop: 120h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_forecast\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temp_min\" or r[\"_field\"] == \"temp_max\")\n  |> yield(name: \"forecast\")",
+          "refId": "A"
+        }
+      ],
+      "title": "5-Day Temperature Forecast",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 20 },
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "id": 9,
+      "options": {
+        "legend": { "calcs": ["max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -30m, stop: 120h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_forecast\")\n  |> filter(fn: (r) => r[\"_field\"] == \"rain_probability\")\n  |> yield(name: \"forecast\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Rain Probability Forecast",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "lineWidth": 2, "fillOpacity": 10 },
+          "unit": "velocityms"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "id": 10,
+      "options": {
+        "legend": { "calcs": ["last", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -30m, stop: 120h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_forecast\")\n  |> filter(fn: (r) => r[\"_field\"] == \"wind_speed\")\n  |> yield(name: \"forecast\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Wind Speed Forecast",
+      "type": "timeseries"
+    },
+    {
+      "collapsed": false,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 20 },
+      "id": 11,
+      "title": "5-Day Weather Forecast",
+      "type": "row"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "mappings": [
+            {
+              "type": "regex",
+              "options": {
+                "pattern": "(?i)clear|sunny",
+                "result": { "color": "#EAB839", "index": 0, "text": "Clear" }
+              }
+            },
+            {
+              "type": "regex",
+              "options": {
+                "pattern": "(?i)cloud|overcast|haze|mist|fog",
+                "result": { "color": "#A0A0A0", "index": 1, "text": "Cloudy" }
+              }
+            },
+            {
+              "type": "regex",
+              "options": {
+                "pattern": "(?i)rain|drizzle|thunder|storm|shower",
+                "result": { "color": "#5794F2", "index": 2, "text": "Rain" }
+              }
+            },
+            {
+              "type": "regex",
+              "options": {
+                "pattern": "(?i)snow|sleet|ice|blizzard",
+                "result": { "color": "#C8D8FF", "index": 3, "text": "Snow" }
+              }
+            }
+          ],
+          "thresholds": { "mode": "absolute", "steps": [{ "color": "text", "value": null }] },
+          "custom": {}
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 5, "w": 24, "x": 0, "y": 21 },
+      "id": 12,
+      "options": {
+        "mergeValues": true,
+        "showValue": "always",
+        "alignValue": "center",
+        "rowHeight": 0.9,
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "single" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -30m, stop: 120h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_forecast\")\n  |> filter(fn: (r) => r[\"_field\"] == \"description\")\n  |> yield(name: \"forecast\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Weather Conditions",
+      "type": "state-timeline"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": { "drawStyle": "bars", "fillOpacity": 60, "lineWidth": 0, "barAlignment": 0 },
+          "unit": "celsius"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 26 },
+      "id": 13,
+      "options": {
+        "legend": { "calcs": ["min", "max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -30m, stop: 120h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_forecast\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temp_min\" or r[\"_field\"] == \"temp_max\")\n  |> yield(name: \"forecast\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Temperature Forecast",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "thresholds" },
+          "custom": { "drawStyle": "bars", "fillOpacity": 100, "lineWidth": 0, "barAlignment": 0 },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 0.3 },
+              { "color": "red", "value": 0.6 }
+            ]
+          },
+          "unit": "percentunit",
+          "min": 0,
+          "max": 1
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 26 },
+      "id": 14,
+      "options": {
+        "legend": { "calcs": ["max"], "displayMode": "table", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: -30m, stop: 120h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_forecast\")\n  |> filter(fn: (r) => r[\"_field\"] == \"rain_probability\")\n  |> yield(name: \"forecast\")",
+          "refId": "A"
+        }
+      ],
+      "title": "Rain Probability",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "celsius", "mappings": [] },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "rain_probability" },
+            "properties": [{ "id": "unit", "value": "percentunit" }]
+          }
+        ]
+      },
+      "gridPos": { "h": 5, "w": 5, "x": 0, "y": 34 },
+      "id": 15,
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "orientation": "auto", "textMode": "auto", "colorMode": "none",
+        "graphMode": "none", "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: 0h, stop: 24h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_forecast\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temp_min\")\n  |> min()",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: 0h, stop: 24h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_forecast\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temp_max\")\n  |> max()",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: 0h, stop: 24h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_forecast\")\n  |> filter(fn: (r) => r[\"_field\"] == \"rain_probability\")\n  |> max()",
+          "refId": "C"
+        }
+      ],
+      "title": "Today",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "celsius", "mappings": [] },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "rain_probability" },
+            "properties": [{ "id": "unit", "value": "percentunit" }]
+          }
+        ]
+      },
+      "gridPos": { "h": 5, "w": 5, "x": 5, "y": 34 },
+      "id": 16,
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "orientation": "auto", "textMode": "auto", "colorMode": "none",
+        "graphMode": "none", "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: 24h, stop: 48h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_forecast\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temp_min\")\n  |> min()",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: 24h, stop: 48h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_forecast\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temp_max\")\n  |> max()",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: 24h, stop: 48h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_forecast\")\n  |> filter(fn: (r) => r[\"_field\"] == \"rain_probability\")\n  |> max()",
+          "refId": "C"
+        }
+      ],
+      "title": "Tomorrow",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "celsius", "mappings": [] },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "rain_probability" },
+            "properties": [{ "id": "unit", "value": "percentunit" }]
+          }
+        ]
+      },
+      "gridPos": { "h": 5, "w": 5, "x": 10, "y": 34 },
+      "id": 17,
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "orientation": "auto", "textMode": "auto", "colorMode": "none",
+        "graphMode": "none", "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: 48h, stop: 72h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_forecast\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temp_min\")\n  |> min()",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: 48h, stop: 72h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_forecast\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temp_max\")\n  |> max()",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: 48h, stop: 72h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_forecast\")\n  |> filter(fn: (r) => r[\"_field\"] == \"rain_probability\")\n  |> max()",
+          "refId": "C"
+        }
+      ],
+      "title": "+2 Days",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "celsius", "mappings": [] },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "rain_probability" },
+            "properties": [{ "id": "unit", "value": "percentunit" }]
+          }
+        ]
+      },
+      "gridPos": { "h": 5, "w": 4, "x": 15, "y": 34 },
+      "id": 18,
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "orientation": "auto", "textMode": "auto", "colorMode": "none",
+        "graphMode": "none", "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: 72h, stop: 96h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_forecast\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temp_min\")\n  |> min()",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: 72h, stop: 96h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_forecast\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temp_max\")\n  |> max()",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: 72h, stop: 96h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_forecast\")\n  |> filter(fn: (r) => r[\"_field\"] == \"rain_probability\")\n  |> max()",
+          "refId": "C"
+        }
+      ],
+      "title": "+3 Days",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+      "fieldConfig": {
+        "defaults": { "color": { "mode": "palette-classic" }, "unit": "celsius", "mappings": [] },
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "rain_probability" },
+            "properties": [{ "id": "unit", "value": "percentunit" }]
+          }
+        ]
+      },
+      "gridPos": { "h": 5, "w": 5, "x": 19, "y": 34 },
+      "id": 19,
+      "options": {
+        "reduceOptions": { "values": false, "calcs": ["lastNotNull"], "fields": "" },
+        "orientation": "auto", "textMode": "auto", "colorMode": "none",
+        "graphMode": "none", "justifyMode": "auto"
+      },
+      "targets": [
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: 96h, stop: 120h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_forecast\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temp_min\")\n  |> min()",
+          "refId": "A"
+        },
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: 96h, stop: 120h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_forecast\")\n  |> filter(fn: (r) => r[\"_field\"] == \"temp_max\")\n  |> max()",
+          "refId": "B"
+        },
+        {
+          "datasource": { "type": "influxdb", "uid": "${DS_INFLUXDB}" },
+          "query": "from(bucket: \"telemetry\")\n  |> range(start: 96h, stop: 120h)\n  |> filter(fn: (r) => r[\"_measurement\"] == \"weather_forecast\")\n  |> filter(fn: (r) => r[\"_field\"] == \"rain_probability\")\n  |> max()",
+          "refId": "C"
+        }
+      ],
+      "title": "+4 Days",
+      "type": "stat"
+    }
+  ],
+  "refresh": "30m",
+  "schemaVersion": 38,
+  "tags": ["iot", "weather"],
+  "templating": {
+    "list": [
+      {
+        "hide": 2,
+        "name": "DS_INFLUXDB",
+        "query": "influxdb",
+        "type": "datasource",
+        "label": "InfluxDB"
+      }
+    ]
+  },
+  "time": { "from": "now-24h", "to": "now" },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Weather",
+  "uid": "iot-weather",
+  "version": 1
+}
