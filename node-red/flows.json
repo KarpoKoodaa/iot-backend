@@ -522,7 +522,7 @@
     "type": "function",
     "z": "tab-owm",
     "name": "Build InfluxDB points",
-    "func": "const list = msg.payload.list || [];\nmsg.payload = list.map(slot => ({\n    measurement: 'weather_forecast',\n    tags: { source: 'openweathermap' },\n    fields: {\n        temp_min:         slot.main.temp_min,\n        temp_max:         slot.main.temp_max,\n        rain_probability: slot.pop,\n        wind_speed:       slot.wind.speed\n    },\n    timestamp: new Date(slot.dt * 1000)\n}));\nreturn msg;",
+    "func": "const list = msg.payload.list || [];\nmsg.payload = list.map(slot => ({\n    measurement: 'weather_forecast',\n    tags: { source: 'openweathermap' },\n    fields: {\n        temp_min:         slot.main.temp_min,\n        temp_max:         slot.main.temp_max,\n        rain_probability: slot.pop,\n        wind_speed:       slot.wind.speed,\n        description:      slot.weather[0].description\n    },\n    timestamp: new Date(slot.dt * 1000)\n}));\nreturn msg;",
     "outputs": 1,
     "noerr": 0,
     "initialize": "",
